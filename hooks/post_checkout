@@ -1,9 +1,9 @@
 #!/bin/bash
 QEMU_flag() {
     case ${ARCH} in
-        arm32v5) QFLAG=qemu-arm-static ;;
-        arm32v7) QFLAG=qemu-arm-static ;;
-        arm64v8) QFLAG=qemu-aarch64-static ;;
+        arm32v5) QFLAG=arm ;;
+        arm32v7) QFLAG=arm ;;
+        arm64v8) QFLAG=aarch64 ;;
     esac
 }
 
