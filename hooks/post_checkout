@@ -1,7 +1,17 @@
 #!/bin/bash
+QEMU_flag() {
+    case ${ARCH} in
+        arm32v5) QFLAG=qemu-arm-static ;;
+        arm32v7) QFLAG=qemu-arm-static ;;
+        arm64v8) QFLAG=qemu-aarch64-static ;;
+    esac
+}
+
 for ARCH in arm32v7 arm64v8
-do 
+do
+    QEMU_flag
     sed 's/ARCH_PLACEHOLDER/'"$ARCH"'/g' ${DOCKERFILE_PATH}.arm > ${DOCKERFILE_PATH}.${ARCH}
+    sed -i 's/QEMU_PLACEHOLDER/'"$QFLAG"'/g' ${DOCKERFILE_PATH}.${ARCH}
     echo "########################################"
     echo "${DOCKERFILE_PATH}.${ARCH}: generated"
 done
