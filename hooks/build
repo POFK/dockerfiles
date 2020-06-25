@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [ $DOCKER_TAG == "latest" ]
 then
     echo -e "building image for multiple arch..."
