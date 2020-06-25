@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  vim:
+    # docker-compose exec --user dev vim bash
+    # docker exec --user dev -it workflow-vimtx bash
+    image: txmao/vimtx:latest
+    container_name: workflow-vim
+    restart: always
+    stdin_open: true
+    tty: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/workspace:/home/workspace
+    environment:
+      - DISPLAY=$DISPLAY
+    network_mode: host
+    ipc: host
+ 
+#   depends_on:
+#     - db
+ 
+  chrome:
+    image: txmao/chrome:latest
+    container_name: workflow-chrome
+    privileged: true
+    entrypoint: []
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $HOME/Downloads:/home/chrome/Downloads
+      - $HOME/.config/google-chrome/:/data
+      - /dev/shm:/dev/shm
+    environment:
+      - DISPLAY=$DISPLAY
+    network_mode: host
+    ipc: host
+    devices:
+      - /dev/snd:/dev/snd
+      - /dev/dri:/dev/dri
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+ 
+
+#volumes:
+#  postgres_data:
