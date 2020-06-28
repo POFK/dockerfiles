@@ -1,9 +1,9 @@
-version: '3'
+version: '3.8'
 
 services:
   vim:
     # docker-compose exec --user dev vim bash
-    # docker exec --user dev -it workflow-vimtx bash
+    # docker exec --user dev -it workflow-vim bash
     image: txmao/vimtx:latest
     container_name: workflow-vim
     restart: always
@@ -13,37 +13,80 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/workspace:/home/workspace
+      - config-volume:/opt/config-volume
     environment:
       - DISPLAY=$DISPLAY
     network_mode: host
     ipc: host
+    
  
 #   depends_on:
 #     - db
  
   chrome:
-    image: txmao/chrome:latest
+    # docker-compose --compatibility start chrome
+    # docker --compatibility start workflow-chrome
+#   image: txmao/chrome:latest
+    build: 
+      context: ./chrome
+      dockerfile: Dockerfile
     container_name: workflow-chrome
+    stdin_open: true
+    tty: true
     privileged: true
-    entrypoint: []
+    entrypoint: ["google-chrome"]
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/Downloads:/home/chrome/Downloads
-      - $HOME/.config/google-chrome/:/data
       - /dev/shm:/dev/shm
+      - config-volume:/home/chrome/.config
     environment:
       - DISPLAY=$DISPLAY
     network_mode: host
-    ipc: host
     devices:
       - /dev/snd:/dev/snd
       - /dev/dri:/dev/dri
     deploy:
       resources:
         limits:
-          cpus: '0.50'
-          memory: 1024M
- 
+          memory: 3000M
 
-#volumes:
-#  postgres_data:
+  monitor:
+    # docker start workflow-bashtop
+    # docker-compose --compatibility exec monitor bashtop
+    build:
+      context: ./bashtop
+      dockerfile: Dockerfile
+    container_name: workflow-monitor
+    stdin_open: true
+#   tty: true
+    entrypoint: ["/usr/bin/bash"]
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=$DISPLAY
+    privileged: true
+    network_mode: host
+    ipc: host
+    pid: host
+
+
+  wpd:
+    # docker-compose --compatibility exec wpd bashtop
+    build:
+      context: ./WebPlotDigitizer
+      dockerfile: Dockerfile
+    container_name: workflow-wpd
+    ports:
+      - "4500:8080"
+
+
+  proxy:
+    image: ubuntu:focal
+    container_name: workflow-proxy
+    network_mode: host
+    command: ["/bin/bash"]
+ 
+volumes:
+  config-volume:
+    name: config-data
