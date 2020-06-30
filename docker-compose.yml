@@ -106,18 +106,31 @@ services:
       - dotfiles-volume:/home/user
 
   chrome-backup:
-    # docker-compose exec backup ./backup.sh
+    # docker-compose exec chrome-backup ./backup.sh
     # docker run --rm -v chrome:/dbdata -v $HOME/backup/chrome:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 1'
     image: futurice/docker-volume-backup:2.1.0
     container_name: workflow-chrome-backup
     restart: always
     environment:
-      BACKUP_CRON_EXPRESSION: "* 4 * * 1"
+      BACKUP_CRON_EXPRESSION: "0 4 * * *"
       TZ: "Asia/Shanghai"
     volumes:
       - chrome:/backup/chrome:ro    # Mount the Grafana data volume (as read-only)
       - $HOME/backup/chrome:/archive        # Mount a local folder as the backup archive
+    depends_on:
+      - backup-rotate
 
+  backup-rotate:
+    build:
+      context: ./python-rotation-backups
+      dockerfile: Dockerfile
+    container_name: workflow-rotate
+    stdin_open: true
+    tty: true
+    volumes:
+      - $HOME/backup/chrome:/archive        # Mount a local folder as the backup archive
+      - ./python-rotation-backups/rotate-backups.ini:/root/.rotate-backups.ini:ro
+      - ./python-rotation-backups/cronjobs:/etc/crontabs/root:ro
 
 volumes:
   chrome:
