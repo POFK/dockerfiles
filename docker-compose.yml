@@ -13,16 +13,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/workspace:/home/workspace
-      - config-volume:/opt/config-volume
+      - chrome:/chrome-volume:ro
+      - dotfiles-volume:/dotfiles-volume:ro
     environment:
       - DISPLAY=$DISPLAY
     network_mode: host
     ipc: host
     
- 
-#   depends_on:
-#     - db
- 
   chrome:
     # docker-compose --compatibility start chrome
     # docker --compatibility start workflow-chrome
@@ -31,15 +28,13 @@ services:
       context: ./chrome
       dockerfile: Dockerfile
     container_name: workflow-chrome
-    stdin_open: true
-    tty: true
     privileged: true
     entrypoint: ["google-chrome"]
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/Downloads:/home/chrome/Downloads
       - /dev/shm:/dev/shm
-      - config-volume:/home/chrome/.config
+      - chrome:/home/chrome/.config
     environment:
       - DISPLAY=$DISPLAY
     network_mode: host
@@ -50,6 +45,8 @@ services:
       resources:
         limits:
           memory: 3000M
+    depends_on:
+      - chrome-backup
 
   monitor:
     # docker start workflow-bashtop
@@ -59,12 +56,7 @@ services:
       dockerfile: Dockerfile
     container_name: workflow-monitor
     stdin_open: true
-#   tty: true
     entrypoint: ["/usr/bin/bash"]
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-    environment:
-      - DISPLAY=$DISPLAY
     privileged: true
     network_mode: host
     ipc: host
@@ -82,11 +74,53 @@ services:
 
 
   proxy:
-    image: ubuntu:focal
+    image: dreamacro/clash:0.20.0 # latest image not work... @2020-06-29
     container_name: workflow-proxy
-    network_mode: host
-    command: ["/bin/bash"]
+    restart: always
+    volumes:
+      - dotfiles-volume:/root
+    ports:
+      - "7890:7890"
+      - "1080:7891"
+      - "9090:9090"
+
+  proxy-ui:
+    image: haishanh/yacd:0.1.23
+    container_name: workflow-proxy-ui
+    restart: always
+    ports:
+      - "9091:80"
+    depends_on:
+      - proxy
  
+
+  dotdrop:
+    # docker-compose --compatibility start dotdrop
+    # docker-compose --compatibility run dotdrop install -p docker
+    build:
+      context: ./dotdrop
+      dockerfile: Dockerfile
+    container_name: workflow-dotdrop
+    volumes:
+      - $HOME/git/dotfiles:/dotfiles
+      - dotfiles-volume:/home/user
+
+  chrome-backup:
+    # docker-compose exec backup ./backup.sh
+    # docker run --rm -v chrome:/dbdata -v $HOME/backup/chrome:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 1'
+    image: futurice/docker-volume-backup:2.1.0
+    container_name: workflow-chrome-backup
+    restart: always
+    environment:
+      BACKUP_CRON_EXPRESSION: "* 4 * * 1"
+      TZ: "Asia/Shanghai"
+    volumes:
+      - chrome:/backup/chrome:ro    # Mount the Grafana data volume (as read-only)
+      - $HOME/backup/chrome:/archive        # Mount a local folder as the backup archive
+
+
 volumes:
-  config-volume:
-    name: config-data
+  chrome:
+    name: chrome
+  dotfiles-volume:
+    name: dotfiles
