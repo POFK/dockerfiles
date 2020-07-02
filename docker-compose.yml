@@ -4,21 +4,30 @@ services:
   vim:
     # docker-compose exec --user dev vim bash
     # docker exec --user dev -it workflow-vim bash
-    image: txmao/vimtx:latest
+#   image: txmao/vimtx:latest
+    build:
+      context: ./vim
+      dockerfile: Dockerfile
     container_name: workflow-vim
     restart: always
     stdin_open: true
     tty: true
+#   entrypoint: ["bash"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/workspace:/home/workspace
-      - chrome:/chrome-volume:ro
-      - dotfiles-volume:/dotfiles-volume:ro
+      - conda:/opt/conda
+      - $HOME/.vimrc:/home/dev/.vimrc
+      - chrome:/volumes/chrome-volume:ro
+      - dotfiles-volume:/volumes/dotfiles-volume:ro
     environment:
       - DISPLAY=$DISPLAY
     network_mode: host
     ipc: host
+    user: 1000:1000
+    depends_on:
+      - python-env
     
   chrome:
     # docker-compose --compatibility start chrome
@@ -46,7 +55,7 @@ services:
         limits:
           memory: 3000M
     depends_on:
-      - chrome-backup
+      - backup-chrome
 
   monitor:
     # docker start workflow-bashtop
@@ -105,11 +114,32 @@ services:
       - $HOME/git/dotfiles:/dotfiles
       - dotfiles-volume:/home/user
 
-  chrome-backup:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3001:3000"
+
+  python-env:
+    #docker run -i -t continuumio/miniconda3 /bin/bash
+    #docker run -i -t -p 8888:8888 continuumio/miniconda3 /bin/bash -c "/opt/conda/bin/conda install jupyter -y --quiet && mkdir /opt/notebooks && /opt/conda/bin/jupyter notebook --notebook-dir=/opt/notebooks --ip='*' --port=8888 --no-browser"
+    image: continuumio/miniconda3
+    container_name: workflow-python-env
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
+    volumes:
+      - conda:/opt/conda
+    ports:
+      - 8890:8888
+    depends_on:
+      - backup-conda
+     
+  backup-chrome:
     # docker-compose exec chrome-backup ./backup.sh
     # docker run --rm -v chrome:/dbdata -v $HOME/backup/chrome:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 1'
     image: futurice/docker-volume-backup:2.1.0
-    container_name: workflow-chrome-backup
+    container_name: workflow-backup-chrome
     restart: always
     environment:
       BACKUP_CRON_EXPRESSION: "0 4 * * *"
@@ -120,20 +150,39 @@ services:
     depends_on:
       - backup-rotate
 
+  backup-conda:
+    # docker-compose exec chrome-backup ./backup.sh
+    # docker run --rm -v chrome:/dbdata -v $HOME/backup/chrome:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 1'
+    image: futurice/docker-volume-backup:2.1.0
+    container_name: workflow-backup-conda
+    restart: always
+    environment:
+      BACKUP_CRON_EXPRESSION: "0 5 * * *"
+      TZ: "Asia/Shanghai"
+    volumes:
+      - conda:/backup/conda:ro    # Mount the Grafana data volume (as read-only)
+      - $HOME/backup/conda:/archive        # Mount a local folder as the backup archive
+    depends_on:
+      - backup-rotate
+
+
   backup-rotate:
     build:
-      context: ./python-rotation-backups
+      context: ./rotation-backups
       dockerfile: Dockerfile
     container_name: workflow-rotate
     stdin_open: true
     tty: true
     volumes:
-      - $HOME/backup/chrome:/archive        # Mount a local folder as the backup archive
-      - ./python-rotation-backups/rotate-backups.ini:/root/.rotate-backups.ini:ro
-      - ./python-rotation-backups/cronjobs:/etc/crontabs/root:ro
+      - ./rotation-backups/rotate-backups.ini:/root/.rotate-backups.ini:ro
+      - ./rotation-backups/cronjobs:/etc/crontabs/root:ro
+      - $HOME/backup/chrome:/archive/chrome        # Mount a local folder as the backup archive
+      - $HOME/backup/conda:/archive/conda        # Mount a local folder as the backup archive
 
 volumes:
   chrome:
     name: chrome
   dotfiles-volume:
     name: dotfiles
+  conda:
+    name: conda-env
