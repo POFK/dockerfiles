@@ -43,9 +43,9 @@ RUN apt-get update \
         python3-dev \
     && ln -s ${TAR}/vim $HOME/.vim \
     && ln -s ${TAR}/fonts $HOME/.fonts \
-    && ln -s ${TAR}/my-snippets $HOME/.vim/plugged/ \
     && fc-cache -vf $HOME/.fonts \
     && vim -u ${TAR}/vimrc -c PlugInstall -c q -c q \
+    && ln -s ${TAR}/my-snippets $HOME/.vim/plugged/ \
     && cd $HOME/.vim/plugged/YouCompleteMe \
     && python3 ./install.py \   
                 --clangd-completer \
