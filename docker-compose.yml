@@ -32,10 +32,7 @@ services:
   chrome:
     # docker-compose --compatibility start chrome
     # docker --compatibility start workflow-chrome
-#   image: txmao/chrome:latest
-    build: 
-      context: ./chrome
-      dockerfile: Dockerfile
+    image: txmao/chrome:latest
     container_name: workflow-chrome
     privileged: true
     entrypoint: ["google-chrome"]

@@ -1,12 +1,11 @@
 FROM ubuntu:focal
 
-RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list &&\
-    apt-get update &&\
-    apt-get install -y software-properties-common
-
 RUN add-apt-repository ppa:bashtop-monitor/bashtop &&\
     apt-get update &&\
-    apt install -y bashtop python3-psutil
+    apt-get install -y \
+        software-properties-common \
+        bashtop \
+        python3-psutil
 
-ENTRYPOINT [ "/usr/bin/bashtop" ]
+ENTRYPOINT [ "/usr/bin/bashtop"]
 

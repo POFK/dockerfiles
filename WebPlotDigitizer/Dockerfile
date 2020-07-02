@@ -7,11 +7,8 @@
 # Set the base image to a long-term Ubuntu release
 FROM ubuntu:18.04
 
-# Dockerfile Maintainer
-MAINTAINER William Denney <wdenney@humanpredictions.com>
-
-RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
-    && apt-get update \
+#RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
+RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive \
        apt-get install --yes --no-install-recommends \
        git unzip wget ca-certificates python3 xz-utils libxml2 \
