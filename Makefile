@@ -20,3 +20,11 @@ push: $(addprefix push_,$(BUILDS))
 push_%:
 	echo "Pushing workflow/$* ..."
 	docker push ${USER}/$*:${DOCKER_TAG}
+
+
+jit: $(addprefix jit_,$(BUILDS))
+
+jit_%:
+	echo "Building workflow/$* ..."
+	docker build -t ${USER}/$*:${DOCKER_TAG} --force-rm $*
+	docker push ${USER}/$*:${DOCKER_TAG}
