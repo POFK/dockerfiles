@@ -4,7 +4,12 @@ services:
   vim:
     # docker-compose exec --user dev vim bash
     # docker exec --user dev -it workflow-vim bash
-    image: txmao/vimtx:1.2.1
+#   image: txmao/vimtx:1.2.1
+    build:
+      context: ./vim
+      dockerfile: Dockerfile
+      args:
+        GFW: "true"
     container_name: workflow-vim
     restart: always
     stdin_open: true
