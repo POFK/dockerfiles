@@ -7,7 +7,10 @@
 # Set the base image to a long-term Ubuntu release
 FROM ubuntu:18.04
 
-#RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
+ARG GFW=false
+
+RUN if [ "$GFW" = true  ] ; then sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list ; else echo GFW is $GFW ; fi
+
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive \
        apt-get install --yes --no-install-recommends \
