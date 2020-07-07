@@ -12,6 +12,6 @@ RUN apt-get update &&\
         docker-compose \
         fzf 
 
-RUN usermod -aG docker dev
+RUN usermod -aG docker dev && newgrp docker 
 
 USER dev

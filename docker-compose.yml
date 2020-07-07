@@ -234,6 +234,18 @@ services:
     depends_on:
       - nginx-proxy
 
+  book:
+#   image: txmao/mdbook
+    container_name: workflow-book
+    build:
+      context: ./mdbook
+      dockerfile: Dockerfile
+    entrypoint: ["mdbook"]
+    volumes:
+      - $HOME/books/env_tool:/books
+    stdin_open: true
+    tty: true
+ 
 
 
 volumes:
