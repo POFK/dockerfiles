@@ -236,16 +236,20 @@ services:
 
   book:
 #   image: txmao/mdbook
-    container_name: workflow-book
     build:
       context: ./mdbook
       dockerfile: Dockerfile
+    container_name: workflow-book
+    environment:
+      - VIRTUAL_HOST=book.local
     entrypoint: ["mdbook"]
+    command: ["serve","-n","0.0.0.0","-p","3000"]
+    expose:
+      - "3000"
     volumes:
       - $HOME/books/env_tool:/books
-    stdin_open: true
-    tty: true
- 
+    depends_on:
+      - nginx-proxy
 
 
 volumes:
