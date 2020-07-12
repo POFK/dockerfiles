@@ -1,5 +1,5 @@
-#FROM txmao/vimtx:1.2.1
-FROM txmao/vimtx:latest
+FROM txmao/vimtx:1.3
+#FROM txmao/vimtx:latest
 
 ARG GFW=false
 
@@ -22,6 +22,10 @@ RUN apt-get update &&\
 
 RUN sed -i 's/socks4/#socks4/g' /etc/proxychains4.conf \
     && echo "socks5  127.0.0.1 1080" >> /etc/proxychains4.conf
+
+# git
+RUN npm install -g commitizen &&\
+        npm install -g cz-conventional-changelog
 
 RUN usermod -aG docker dev && newgrp docker 
 
