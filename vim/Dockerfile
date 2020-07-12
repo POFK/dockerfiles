@@ -25,7 +25,7 @@ RUN sed -i 's/socks4/#socks4/g' /etc/proxychains4.conf \
 
 # git
 RUN npm install -g commitizen &&\
-        npm install -g cz-conventional-changelog
+        npm install -g conventional-changelog-cli
 
 RUN usermod -aG docker dev && newgrp docker 
 
