@@ -4,6 +4,7 @@ services:
   nginx-proxy:
     image: jwilder/nginx-proxy
     container_name: workflow-nginx-proxy
+    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -15,7 +16,7 @@ services:
   vim:
     # docker-compose exec --user dev vim bash
     # docker exec --user dev -it workflow-vim bash
-#   image: txmao/vimtx:1.2.1
+#   image: txmao/vimtx:latest
     build:
       context: ./vim
       dockerfile: Dockerfile
@@ -25,14 +26,19 @@ services:
     restart: always
     stdin_open: true
     tty: true
+    environment:
+      - VIMDIR="/opt/vimtx"
     entrypoint: ["bash"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/workspace:/home/workspace
+      - $HOME/git:/home/dev/git
+      - $HOME/books:/home/dev/books
+      - $HOME/Pictures:/home/dev/Pictures
+      - $HOME/Downloads:/home/dev/Downloads
       - conda:/opt/conda
       - vimtx:/opt/vimtx
-      - $HOME/.vimrc:/home/dev/.vimrc
       - chrome:/volumes/chrome-volume:ro
       - dotfiles-volume:/volumes/dotfiles-volume:ro
       - gitcache:/volumes/gitcache-volume:ro
@@ -42,6 +48,7 @@ services:
     ipc: host
     depends_on:
       - python-env
+      - gitcache
     
   chrome:
     # docker-compose --compatibility start chrome
@@ -90,6 +97,7 @@ services:
     # docker-compose --compatibility exec wpd bashtop
     image: txmao/wpd:0.1
     container_name: workflow-wpd
+    restart: always
     environment:
       - VIRTUAL_HOST=wpd.local
     expose:
@@ -221,6 +229,7 @@ services:
       args:
         GFW: "true"
     container_name: workflow-gitcache
+    restart: always
     environment:
       - VIRTUAL_HOST=gitcache.local
       - HTTP_PROXY=http://proxy:7890
@@ -240,6 +249,7 @@ services:
       context: ./mdbook
       dockerfile: Dockerfile
     container_name: workflow-book
+    restart: always
     environment:
       - VIRTUAL_HOST=book.local
     entrypoint: ["mdbook"]
@@ -250,6 +260,26 @@ services:
       - $HOME/books/env_tool:/books
     depends_on:
       - nginx-proxy
+
+
+  diary:
+#   image: txmao/mdbook
+    build:
+      context: ./mdbook
+      dockerfile: Dockerfile
+    container_name: workflow-diary
+    restart: always
+    environment:
+      - VIRTUAL_HOST=diary.local
+    entrypoint: ["mdbook"]
+    command: ["serve","-n","0.0.0.0","-p","3000"]
+    expose:
+      - "3000"
+    volumes:
+      - $HOME/books/diary:/books
+    depends_on:
+      - nginx-proxy
+
 
 
 volumes:

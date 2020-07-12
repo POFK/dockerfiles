@@ -18,13 +18,6 @@ ADD requirements.txt /requirements.txt
 RUN groupadd -r $UNAME --gid=1000 && \ 
     useradd -m -s /bin/bash -r -g $UNAME --uid=1000 $UNAME
 
-RUN apt update \
-        && apt install -y git file
-
-
-RUN pip3 install -r /requirements.txt
-
-
 USER $UNAME
 
 ENTRYPOINT ["/bin/bash","/dotfiles/dotdrop.sh", "--cfg", "/dotfiles/config.yaml"]
