@@ -5,14 +5,11 @@ ARG GFW=false
 
 USER root
 
-ADD entrypoint.sh /entrypoint.sh
-
-RUN chmod +x /entrypoint.sh
-
 RUN if [ "$GFW" = true  ] ; then sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list ; else echo GFW is $GFW ; fi
 
 RUN apt-get update &&\
     apt-get install -y \
+        language-pack-en \
         docker \
         docker-compose \
         proxychains4 \
@@ -28,5 +25,8 @@ RUN npm install -g commitizen &&\
         npm install -g conventional-changelog-cli
 
 RUN usermod -aG docker dev && newgrp docker 
+
+ADD entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 USER dev

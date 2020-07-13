@@ -22,6 +22,7 @@ services:
       dockerfile: Dockerfile
       args:
         GFW: "true"
+    image: piregistry.com:5000/workflow-vim
     container_name: workflow-vim
     restart: always
     stdin_open: true
@@ -83,6 +84,7 @@ services:
       dockerfile: Dockerfile
       args:
         GFW: "true"
+    image: piregistry.com:5000/workflow-monitor
     container_name: workflow-monitor
     restart: always
     stdin_open: true
@@ -137,6 +139,7 @@ services:
       dockerfile: Dockerfile
       args:
         GFW: "true"
+    image: piregistry.com:5000/workflow-dotdrop
     container_name: workflow-dotdrop
     volumes:
       - $HOME/git/dotfiles:/dotfiles
@@ -211,6 +214,7 @@ services:
     build:
       context: ./rotation-backups
       dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-rotate
     container_name: workflow-rotate
     restart: always
     stdin_open: true
@@ -228,6 +232,7 @@ services:
       dockerfile: Dockerfile
       args:
         GFW: "true"
+    image: piregistry.com:5000/workflow-gitcache
     container_name: workflow-gitcache
     restart: always
     environment:
@@ -248,6 +253,7 @@ services:
     build:
       context: ./mdbook
       dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-book
     container_name: workflow-book
     restart: always
     environment:
@@ -267,6 +273,7 @@ services:
     build:
       context: ./mdbook
       dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-book
     container_name: workflow-diary
     restart: always
     environment:
@@ -279,6 +286,26 @@ services:
       - $HOME/books/diary:/books
     depends_on:
       - nginx-proxy
+
+  academic:
+#   image: txmao/mdbook
+    build:
+      context: ./mdbook
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-book
+    container_name: workflow-academic-book
+    restart: always
+    environment:
+      - VIRTUAL_HOST=academic.local
+    entrypoint: ["mdbook"]
+    command: ["serve","-n","0.0.0.0","-p","3000"]
+    expose:
+      - "3000"
+    volumes:
+      - $HOME/books/academic:/books
+    depends_on:
+      - nginx-proxy
+
 
 
 
