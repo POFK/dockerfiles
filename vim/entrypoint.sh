@@ -8,6 +8,4 @@ proxychains4 ~/.fzf/install
 git clone --depth 1 https://github.com/samoshkin/tmux-config.git ~/tmux-config
 proxychains4 ~/tmux-config/install.sh
 
-mv ~/.tmux.conf.bak ~/.tmux.conf
-
 #exec $@
