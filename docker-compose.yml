@@ -43,6 +43,7 @@ services:
       - $HOME/books:/home/dev/books
       - $HOME/Pictures:/home/dev/Pictures
       - $HOME/Downloads:/home/dev/Downloads
+      - $HOME/.ssh:/home/dev/.ssh
       - conda:/opt/conda
       - vimtx:/opt/vimtx
       - chrome:/volumes/chrome-volume:ro
