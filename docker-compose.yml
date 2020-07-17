@@ -2,7 +2,11 @@ version: '3.8'
 
 services:
   nginx-proxy:
-    image: jwilder/nginx-proxy
+    #image: jwilder/nginx-proxy
+    build:
+      context: ./nginx-proxy
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-nginx-proxy
     container_name: workflow-nginx-proxy
     restart: always
     ports:
@@ -55,7 +59,10 @@ services:
   chrome:
     # docker-compose --compatibility start chrome
     # docker --compatibility start workflow-chrome
-    image: txmao/chrome:0.2
+    build:
+      context: ./chrome
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-chrome
     container_name: workflow-chrome
     privileged: true
     entrypoint: ["google-chrome"]
@@ -98,7 +105,10 @@ services:
 
   wpd:
     # docker-compose --compatibility exec wpd bashtop
-    image: txmao/wpd:0.1
+    build:
+      context: ./WebPlotDigitizer
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-wpd
     container_name: workflow-wpd
     restart: always
     environment:
@@ -110,7 +120,10 @@ services:
 
 
   proxy:
-    image: dreamacro/clash:0.20.0 # latest image not work... @2020-06-29
+    build:
+      context: ./clash
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-proxy
     container_name: workflow-proxy
     restart: always
     volumes:
@@ -121,7 +134,10 @@ services:
       - "9090:9090"
 
   proxy-ui:
-    image: haishanh/yacd:0.1.23
+    build:
+      context: ./yacd
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-proxyui
     container_name: workflow-proxy-ui
     restart: always
     environment:

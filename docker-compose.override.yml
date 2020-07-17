@@ -23,7 +23,10 @@ services:
     # docker-compose exec backup-chrome ./backup.sh
     # #not work...   docker-compose exec backup-chrome bash -c 'cd /backup/chrome && tar xzvf `ls /archive/backup*.tar.gz -t | head -1` --strip 2'
     # docker run --rm -v chrome:/dbdata -v $HOME/backup/chrome:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    image: futurice/docker-volume-backup:2.1.0
+    build:
+      context: ./volume_backup
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-backup
     container_name: workflow-backup-chrome
     restart: always
     environment:
@@ -37,7 +40,10 @@ services:
 
   backup-conda:
     # docker run --rm -v conda-env:/dbdata -v $HOME/backup/conda:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    image: futurice/docker-volume-backup:2.1.0
+    build:
+      context: ./volume_backup
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-backup
     container_name: workflow-backup-conda
     restart: always
     environment:
@@ -51,7 +57,10 @@ services:
 
   backup-vimenv:
     # docker run --rm -v vim-env:/dbdata -v $HOME/backup/vimtx:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    image: futurice/docker-volume-backup:2.1.0
+    build:
+      context: ./volume_backup
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-backup
     container_name: workflow-backup-vimenv
     restart: always
     environment:
@@ -64,7 +73,10 @@ services:
       - backup-rotate
 
   backup-kanboard:
-    image: futurice/docker-volume-backup:2.1.0
+    build:
+      context: ./volume_backup
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-backup
     container_name: workflow-backup-kanboard
     restart: always
     environment:
