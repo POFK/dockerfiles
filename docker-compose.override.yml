@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  backup-rotate:
+    build:
+      context: ./rotation-backups
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-rotate
+    container_name: workflow-rotate
+    restart: always
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./rotation-backups/rotate-backups.ini:/root/.rotate-backups.ini:ro
+      - ./rotation-backups/cronjobs:/etc/crontabs/root:ro
+      - $HOME/backup/chrome:/archive/chrome        # Mount a local folder as the backup archive
+      - $HOME/backup/conda:/archive/conda        # Mount a local folder as the backup archive
+      - $HOME/backup/vimtx:/archive/vimtx        # Mount a local folder as the backup archive
+      - $HOME/backup/kanboard:/archive/kanboard        # Mount a local folder as the backup archive
+
+ 
+  backup-chrome:
+    # docker-compose exec backup-chrome ./backup.sh
+    # #not work...   docker-compose exec backup-chrome bash -c 'cd /backup/chrome && tar xzvf `ls /archive/backup*.tar.gz -t | head -1` --strip 2'
+    # docker run --rm -v chrome:/dbdata -v $HOME/backup/chrome:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
+    image: futurice/docker-volume-backup:2.1.0
+    container_name: workflow-backup-chrome
+    restart: always
+    environment:
+      BACKUP_CRON_EXPRESSION: "0 4 * * *"
+      TZ: "Asia/Shanghai"
+    volumes:
+      - chrome:/backup/chrome:ro    # Mount the Grafana data volume (as read-only)
+      - $HOME/backup/chrome:/archive        # Mount a local folder as the backup archive
+    depends_on:
+      - backup-rotate
+
+  backup-conda:
+    # docker run --rm -v conda-env:/dbdata -v $HOME/backup/conda:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
+    image: futurice/docker-volume-backup:2.1.0
+    container_name: workflow-backup-conda
+    restart: always
+    environment:
+      BACKUP_CRON_EXPRESSION: "0 5 * * *"
+      TZ: "Asia/Shanghai"
+    volumes:
+      - conda:/backup/conda:ro    # Mount the Grafana data volume (as read-only)
+      - $HOME/backup/conda:/archive        # Mount a local folder as the backup archive
+    depends_on:
+      - backup-rotate
+
+  backup-vimenv:
+    # docker run --rm -v vim-env:/dbdata -v $HOME/backup/vimtx:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
+    image: futurice/docker-volume-backup:2.1.0
+    container_name: workflow-backup-vimenv
+    restart: always
+    environment:
+      BACKUP_CRON_EXPRESSION: "10 5 * * *"
+      TZ: "Asia/Shanghai"
+    volumes:
+      - vimtx:/backup/vimtx:ro    # Mount the Grafana data volume (as read-only)
+      - $HOME/backup/vimtx:/archive        # Mount a local folder as the backup archive
+    depends_on:
+      - backup-rotate
+
+  backup-kanboard:
+    image: futurice/docker-volume-backup:2.1.0
+    container_name: workflow-backup-kanboard
+    restart: always
+    environment:
+      BACKUP_CRON_EXPRESSION: "30 5 * * *"
+      TZ: "Asia/Shanghai"
+    volumes:
+      - kanboard_data:/backup/kanboard:ro    # Mount the Grafana data volume (as read-only)
+      - $HOME/backup/kanboard:/archive        # Mount a local folder as the backup archive
+    depends_on:
+      - backup-rotate
+
+

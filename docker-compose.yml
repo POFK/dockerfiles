@@ -14,6 +14,7 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   vim:
+    # FIXIT(vimtex): tlmgr install pdftexcmds
     # docker-compose exec --user dev vim bash
     # docker exec --user dev -it workflow-vim bash
 #   image: txmao/vimtx:latest
@@ -166,66 +167,6 @@ services:
     depends_on:
       - backup-conda
      
-  backup-chrome:
-    # docker-compose exec backup-chrome ./backup.sh
-    # #not work...   docker-compose exec backup-chrome bash -c 'cd /backup/chrome && tar xzvf `ls /archive/backup*.tar.gz -t | head -1` --strip 2'
-    # docker run --rm -v chrome:/dbdata -v $HOME/backup/chrome:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    image: futurice/docker-volume-backup:2.1.0
-    container_name: workflow-backup-chrome
-    restart: always
-    environment:
-      BACKUP_CRON_EXPRESSION: "0 4 * * *"
-      TZ: "Asia/Shanghai"
-    volumes:
-      - chrome:/backup/chrome:ro    # Mount the Grafana data volume (as read-only)
-      - $HOME/backup/chrome:/archive        # Mount a local folder as the backup archive
-    depends_on:
-      - backup-rotate
-
-  backup-conda:
-    # docker run --rm -v conda-env:/dbdata -v $HOME/backup/conda:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    image: futurice/docker-volume-backup:2.1.0
-    container_name: workflow-backup-conda
-    restart: always
-    environment:
-      BACKUP_CRON_EXPRESSION: "0 5 * * *"
-      TZ: "Asia/Shanghai"
-    volumes:
-      - conda:/backup/conda:ro    # Mount the Grafana data volume (as read-only)
-      - $HOME/backup/conda:/archive        # Mount a local folder as the backup archive
-    depends_on:
-      - backup-rotate
-
-  backup-vimenv:
-    # docker run --rm -v vim-env:/dbdata -v $HOME/backup/vimtx:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    image: futurice/docker-volume-backup:2.1.0
-    container_name: workflow-backup-vimenv
-    restart: always
-    environment:
-      BACKUP_CRON_EXPRESSION: "10 5 * * *"
-      TZ: "Asia/Shanghai"
-    volumes:
-      - vimtx:/backup/vimtx:ro    # Mount the Grafana data volume (as read-only)
-      - $HOME/backup/vimtx:/archive        # Mount a local folder as the backup archive
-    depends_on:
-      - backup-rotate
-
-  backup-rotate:
-    build:
-      context: ./rotation-backups
-      dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-rotate
-    container_name: workflow-rotate
-    restart: always
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./rotation-backups/rotate-backups.ini:/root/.rotate-backups.ini:ro
-      - ./rotation-backups/cronjobs:/etc/crontabs/root:ro
-      - $HOME/backup/chrome:/archive/chrome        # Mount a local folder as the backup archive
-      - $HOME/backup/conda:/archive/conda        # Mount a local folder as the backup archive
-      - $HOME/backup/vimtx:/archive/vimtx        # Mount a local folder as the backup archive
-
   gitcache:
     build:
       context: ./gitcache
@@ -306,8 +247,29 @@ services:
     depends_on:
       - nginx-proxy
 
-
-
+  project:
+  # install plugins
+  # docker-compose exec -u nginx project git clone https://github.com/creecros/Task2pdf /var/www/app/plugins/Task2pdf
+  # image: kanboard/kanboard:v1.2.15
+    build:
+      context: ./kanboard
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-pm
+    container_name: workflow-pm
+    extra_hosts:
+      - "gitcache.local:172.17.0.1"
+    environment:
+      - VIRTUAL_HOST=pm.local
+    expose:
+      - "80"
+      - "443"
+    volumes:
+      - kanboard_data:/var/www/app/data
+      - kanboard_plugins:/var/www/app/plugins
+    # - kanboard_ssl:/etc/nginx/ssl
+    depends_on:
+      - nginx-proxy
+      - backup-kanboard
 
 volumes:
   dotfiles-volume:
@@ -320,3 +282,9 @@ volumes:
     name: vim-env
   gitcache:
     name: gitcache
+  kanboard_data:
+    name: pm_data
+  kanboard_plugins:
+    name: pm_plugins
+
+
