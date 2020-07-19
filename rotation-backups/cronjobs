@@ -1,2 +1,2 @@
 # m h  dom mon dow   command                                                                                                                                                           
-0 */3  * * * /usr/local/bin/rotate-backups
+0 */3 * * * /usr/local/bin/rotate-backups

@@ -12,7 +12,6 @@ services:
     tty: true
     volumes:
       - ./rotation-backups/rotate-backups.ini:/root/.rotate-backups.ini:ro
-      - ./rotation-backups/cronjobs:/etc/crontabs/root:ro
       - $HOME/backup/chrome:/archive/chrome        # Mount a local folder as the backup archive
       - $HOME/backup/conda:/archive/conda        # Mount a local folder as the backup archive
       - $HOME/backup/vimtx:/archive/vimtx        # Mount a local folder as the backup archive
