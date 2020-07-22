@@ -79,7 +79,7 @@ services:
     container_name: workflow-backup-kanboard
     restart: always
     environment:
-      BACKUP_CRON_EXPRESSION: "30 5 * * *"
+      BACKUP_CRON_EXPRESSION: "30 */4 * * *"
       TZ: "Asia/Shanghai"
     volumes:
       - kanboard_data:/backup/kanboard:ro    # Mount the Grafana data volume (as read-only)

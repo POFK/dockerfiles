@@ -18,7 +18,7 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   vim:
-    # FIXIT(vimtex): tlmgr install pdftexcmds
+    # FIXIT(vimtex): tlmgr install pdftexcmds && sudo apt install texlive-full
     # docker-compose exec --user dev vim bash
     # docker exec --user dev -it workflow-vim bash
 #   image: txmao/vimtx:latest
@@ -84,6 +84,22 @@ services:
           memory: 3000M
     depends_on:
       - backup-chrome
+
+  autossh:
+    build:
+      context: ./sshd
+      dockerfile: Dockerfile
+    image: piregistry.com:5000/workflow-autossh
+    container_name: workflow-autossh
+    command: ["top"]
+#   restart: always
+    volumes:
+      - $HOME/.ssh:/home/user/.ssh
+    ports:
+      - "18000:8000" # nova notebook
+      - "18001:8001" # gnova kubeflow
+      - "18002:8002" # gnova login
+
 
   monitor:
     # docker start workflow-bashtop
