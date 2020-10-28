@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+  openwrt:
+      # docker-compose up -d 
+      # docker-compose down -v
+#   build:
+#     context: ./openwrt
+#     dockerfile: Dockerfile
+#   image: openwrt
+    image: unifreq/openwrt-aarch64
+    container_name: openwrt
+    volumes: 
+      - ./openwrt/network:/etc/config/network
+      - ./openwrt/resolv.conf:/etc/resolv.conf
+    restart: always
+    privileged: true
+    command: ["/sbin/init"]
+    networks:
+      #macnet:
+      openwrt_net:
+        ipv4_address: 10.0.0.100
+#       ipv6_address: 2001:3984:3989::10
+
+
+networks:
+  openwrt_net:
+    driver: macvlan
+    driver_opts:
+      parent: eth0
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
+#       - subnet: "2001:3984:3989::/64"
+#         gateway: "2408:8207:78cb:1f30:40fd:69d4:98e1:b7ca"
+    
