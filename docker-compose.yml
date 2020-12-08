@@ -18,7 +18,7 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   vim:
-    # FIXIT(vimtex): tlmgr install pdftexcmds && sudo apt install texlive-full
+    # FIXIT(vimtex): tlmgr install pdftexcmds && sudo apt install texlive-latex-full
     # docker-compose exec --user dev vim bash
     # docker exec --user dev -it workflow-vim bash
 #   image: txmao/vimtx:latest
@@ -47,7 +47,7 @@ services:
       - conda:/opt/conda
       - vimtx:/opt/vimtx
       - chrome:/volumes/chrome-volume:ro
-      - dotfiles-volume:/volumes/dotfiles-volume:ro
+      - dotfiles-volume:/volumes/dotfiles-volume
       - gitcache:/volumes/gitcache-volume:ro
     environment:
       - DISPLAY=$DISPLAY
@@ -91,7 +91,9 @@ services:
       dockerfile: Dockerfile
     image: piregistry.com:5000/workflow-autossh
     container_name: workflow-autossh
-    command: ["top"]
+    stdin_open: true
+    tty: true
+    command: ["sh"]
 #   restart: always
     volumes:
       - $HOME/.ssh:/home/user/.ssh
@@ -136,35 +138,6 @@ services:
       - nginx-proxy
 
 
-  proxy:
-    build:
-      context: ./clash
-      dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-proxy
-    container_name: workflow-proxy
-    restart: always
-    volumes:
-      - dotfiles-volume:/root
-    ports:
-      - "7890:7890"
-      - "1080:7891"
-      - "9090:9090"
-
-  proxy-ui:
-    build:
-      context: ./yacd
-      dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-proxyui
-    container_name: workflow-proxy-ui
-    restart: always
-    environment:
-      - VIRTUAL_HOST=proxyui.local
-    expose: 
-      - "80"
-    depends_on:
-      - proxy
-      - nginx-proxy
-
   dotdrop:
     # docker-compose --compatibility start dotdrop
     # docker-compose --compatibility run dotdrop install -p docker
@@ -178,12 +151,6 @@ services:
     volumes:
       - $HOME/git/dotfiles:/dotfiles
       - dotfiles-volume:/home/user
-
-# grafana:
-#   image: grafana/grafana
-#   container_name: grafana
-#   ports:
-#     - "3001:3000"
 
   python-env:
     #docker run -i -t continuumio/miniconda3 /bin/bash
@@ -200,28 +167,6 @@ services:
     depends_on:
       - backup-conda
      
-  gitcache:
-    build:
-      context: ./gitcache
-      dockerfile: Dockerfile
-      args:
-        GFW: "true"
-    image: piregistry.com:5000/workflow-gitcache
-    container_name: workflow-gitcache
-    restart: always
-    environment:
-      - VIRTUAL_HOST=gitcache.local
-      - HTTP_PROXY=http://proxy:7890
-      - HTTPS_PROXY=http://proxy:7890
-      - NO_PROXY="127.0.0.1,localhost,gitcache,gitcache.local"
-    volumes:
-      - gitcache:/var/gitcache
-    expose:
-      - "5000"
-    entrypoint: ["/gitcache/gitcache", "-b", "/var/gitcache"]
-    depends_on:
-      - nginx-proxy
-
   book:
 #   image: txmao/mdbook
     build:
@@ -280,30 +225,6 @@ services:
     depends_on:
       - nginx-proxy
 
-  project:
-  # install plugins
-  # docker-compose exec -u nginx project git clone https://github.com/creecros/Task2pdf /var/www/app/plugins/Task2pdf
-  # image: kanboard/kanboard:v1.2.15
-    build:
-      context: ./kanboard
-      dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-pm
-    container_name: workflow-pm
-    extra_hosts:
-      - "gitcache.local:172.17.0.1"
-    environment:
-      - VIRTUAL_HOST=pm.local
-    expose:
-      - "80"
-      - "443"
-    volumes:
-      - kanboard_data:/var/www/app/data
-      - kanboard_plugins:/var/www/app/plugins
-    # - kanboard_ssl:/etc/nginx/ssl
-    depends_on:
-      - nginx-proxy
-      - backup-kanboard
-
 volumes:
   dotfiles-volume:
     name: dotfiles
@@ -313,11 +234,5 @@ volumes:
     name: conda-env
   vimtx:
     name: vim-env
-  gitcache:
-    name: gitcache
-  kanboard_data:
-    name: pm_data
-  kanboard_plugins:
-    name: pm_plugins
 
 
