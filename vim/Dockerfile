@@ -26,6 +26,4 @@ RUN chmod +x /entrypoint.sh
 USER dev
 ENV HOME="/home/dev"
 
-RUN mkdir $HOME/git && cd $HOME/git && git clone http://git.storage.datalab/POFK/dotfiles.git --recursive
-
 WORKDIR $HOME/workspace
