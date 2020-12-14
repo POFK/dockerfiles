@@ -25,8 +25,6 @@ services:
     build:
       context: ./vim
       dockerfile: Dockerfile
-      args:
-        GFW: "true"
     image: docker.storage.datalab/workflow-vim
     container_name: workflow-vim
     restart: always
@@ -40,10 +38,10 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - $HOME/workspace:/home/dev/workspace
       - $HOME/git:/home/dev/git
-      - $HOME/books:/home/dev/books
+#     - $HOME/books:/home/dev/books
       - $HOME/Pictures:/home/dev/Pictures
       - $HOME/Downloads:/home/dev/Downloads
-      - $HOME/.ssh:/home/dev/.ssh
+      - $HOME/.ssh:/home/dev/.ssh:ro
       - conda:/opt/conda
       - vimtx:/opt/vimtx
       - chrome:/volumes/chrome-volume:ro
@@ -51,8 +49,8 @@ services:
       - DISPLAY=$DISPLAY
     network_mode: host
     ipc: host
-#   depends_on:
-#     - python-env
+    depends_on:
+      - python-env
     
 
   chrome:
@@ -73,6 +71,7 @@ services:
     environment:
       - DISPLAY=$DISPLAY
     network_mode: host
+    ipc: host
     devices:
       - /dev/snd:/dev/snd
       - /dev/dri:/dev/dri
