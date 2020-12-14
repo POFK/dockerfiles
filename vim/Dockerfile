@@ -1,26 +1,23 @@
 FROM txmao/vimtx:1.3
-#FROM txmao/vimtx:latest
-
-ARG GFW=false
 
 USER root
 
-RUN if [ "$GFW" = true  ] ; then sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list ; else echo GFW is $GFW ; fi
+ENV HOME="/root"
 
+RUN curl http://git.storage.datalab/POFK/ansible-init/raw/main/files/add_caches.sh | sh -s all ubuntu focal
 RUN apt-get update &&\
     apt-get install -y \
         language-pack-en \
-        docker \
+	docker \
         docker-compose \
         proxychains4 \
         libproxychains4 \
         highlight \
+	python3 \
+	python3-dev \
+	python3-pip \
         fzf 
 
-RUN sed -i 's/socks4/#socks4/g' /etc/proxychains4.conf \
-    && echo "socks5  127.0.0.1 1080" >> /etc/proxychains4.conf
-
-# git
 RUN npm install -g commitizen &&\
         npm install -g conventional-changelog-cli
 
@@ -30,3 +27,8 @@ ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 USER dev
+ENV HOME="/home/dev"
+
+RUN mkdir $HOME/git && cd $HOME/git && git clone http://git.storage.datalab/POFK/dotfiles.git --recursive
+
+WORKDIR $HOME/workspace
