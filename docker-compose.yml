@@ -6,7 +6,7 @@ services:
     build:
       context: ./nginx-proxy
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-nginx-proxy
+    image: docker.storage.datalab/workflow-nginx-proxy
     container_name: workflow-nginx-proxy
     restart: always
     ports:
@@ -27,7 +27,7 @@ services:
       dockerfile: Dockerfile
       args:
         GFW: "true"
-    image: piregistry.com:5000/workflow-vim
+    image: docker.storage.datalab/workflow-vim
     container_name: workflow-vim
     restart: always
     stdin_open: true
@@ -38,7 +38,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - $HOME/workspace:/home/workspace
+      - $HOME/workspace:/home/dev/workspace
       - $HOME/git:/home/dev/git
       - $HOME/books:/home/dev/books
       - $HOME/Pictures:/home/dev/Pictures
@@ -47,23 +47,21 @@ services:
       - conda:/opt/conda
       - vimtx:/opt/vimtx
       - chrome:/volumes/chrome-volume:ro
-      - dotfiles-volume:/volumes/dotfiles-volume
-      - gitcache:/volumes/gitcache-volume:ro
     environment:
       - DISPLAY=$DISPLAY
     network_mode: host
     ipc: host
-    depends_on:
-      - python-env
-      - gitcache
+#   depends_on:
+#     - python-env
     
+
   chrome:
     # docker-compose --compatibility start chrome
     # docker --compatibility start workflow-chrome
     build:
       context: ./chrome
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-chrome
+    image: docker.storage.datalab/workflow-chrome
     container_name: workflow-chrome
     privileged: true
     entrypoint: ["google-chrome"]
@@ -89,7 +87,7 @@ services:
     build:
       context: ./sshd
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-autossh
+    image: docker.storage.datalab/workflow-autossh
     container_name: workflow-autossh
     stdin_open: true
     tty: true
@@ -111,7 +109,7 @@ services:
       dockerfile: Dockerfile
       args:
         GFW: "true"
-    image: piregistry.com:5000/workflow-monitor
+    image: docker.storage.datalab/workflow-monitor
     container_name: workflow-monitor
     restart: always
     stdin_open: true
@@ -127,7 +125,7 @@ services:
     build:
       context: ./WebPlotDigitizer
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-wpd
+    image: docker.storage.datalab/workflow-wpd
     container_name: workflow-wpd
     restart: always
     environment:
@@ -146,7 +144,7 @@ services:
       dockerfile: Dockerfile
       args:
         GFW: "true"
-    image: piregistry.com:5000/workflow-dotdrop
+    image: docker.storage.datalab/workflow-dotdrop
     container_name: workflow-dotdrop
     volumes:
       - $HOME/git/dotfiles:/dotfiles
@@ -164,15 +162,15 @@ services:
       - conda:/opt/conda
     expose:
       - "8888"
-    depends_on:
-      - backup-conda
+#   depends_on:
+#     - backup-conda
      
   book:
 #   image: txmao/mdbook
     build:
       context: ./mdbook
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-book
+    image: docker.storage.datalab/workflow-book
     container_name: workflow-book
     restart: always
     environment:
@@ -192,7 +190,7 @@ services:
     build:
       context: ./mdbook
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-book
+    image: docker.storage.datalab/workflow-book
     container_name: workflow-diary
     restart: always
     environment:
@@ -211,7 +209,7 @@ services:
     build:
       context: ./mdbook
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-book
+    image: docker.storage.datalab/workflow-book
     container_name: workflow-academic-book
     restart: always
     environment:

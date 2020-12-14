@@ -5,7 +5,7 @@ services:
     build:
       context: ./rotation-backups
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-rotate
+    image: docker.storage.datalab/workflow-rotate
     container_name: workflow-rotate
     restart: always
     stdin_open: true
@@ -13,9 +13,9 @@ services:
     volumes:
       - ./rotation-backups/rotate-backups.ini:/root/.rotate-backups.ini:ro
       - $HOME/backup/chrome:/archive/chrome        # Mount a local folder as the backup archive
-      - $HOME/backup/conda:/archive/conda        # Mount a local folder as the backup archive
-      - $HOME/backup/vimtx:/archive/vimtx        # Mount a local folder as the backup archive
-      - $HOME/backup/kanboard:/archive/kanboard        # Mount a local folder as the backup archive
+#     - $HOME/backup/conda:/archive/conda        # Mount a local folder as the backup archive
+#     - $HOME/backup/vimtx:/archive/vimtx        # Mount a local folder as the backup archive
+#     - $HOME/backup/kanboard:/archive/kanboard        # Mount a local folder as the backup archive
 
  
   backup-chrome:
@@ -25,7 +25,7 @@ services:
     build:
       context: ./volume_backup
       dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-backup
+    image: docker.storage.datalab/workflow-backup
     container_name: workflow-backup-chrome
     restart: always
     environment:
@@ -37,54 +37,36 @@ services:
     depends_on:
       - backup-rotate
 
-  backup-conda:
-    # docker run --rm -v conda-env:/dbdata -v $HOME/backup/conda:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    build:
-      context: ./volume_backup
-      dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-backup
-    container_name: workflow-backup-conda
-    restart: always
-    environment:
-      BACKUP_CRON_EXPRESSION: "0 5 * * *"
-      TZ: "Asia/Shanghai"
-    volumes:
-      - conda:/backup/conda:ro    # Mount the Grafana data volume (as read-only)
-      - $HOME/backup/conda:/archive        # Mount a local folder as the backup archive
-    depends_on:
-      - backup-rotate
+# backup-conda:
+#   # docker run --rm -v conda-env:/dbdata -v $HOME/backup/conda:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
+#   build:
+#     context: ./volume_backup
+#     dockerfile: Dockerfile
+#   image: docker.storage.datalab/workflow-backup
+#   container_name: workflow-backup-conda
+#   restart: always
+#   environment:
+#     BACKUP_CRON_EXPRESSION: "0 5 * * *"
+#     TZ: "Asia/Shanghai"
+#   volumes:
+#     - conda:/backup/conda:ro    # Mount the Grafana data volume (as read-only)
+#     - $HOME/backup/conda:/archive        # Mount a local folder as the backup archive
+#   depends_on:
+#     - backup-rotate
 
-  backup-vimenv:
-    # docker run --rm -v vim-env:/dbdata -v $HOME/backup/vimtx:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
-    build:
-      context: ./volume_backup
-      dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-backup
-    container_name: workflow-backup-vimenv
-    restart: always
-    environment:
-      BACKUP_CRON_EXPRESSION: "10 5 * * *"
-      TZ: "Asia/Shanghai"
-    volumes:
-      - vimtx:/backup/vimtx:ro    # Mount the Grafana data volume (as read-only)
-      - $HOME/backup/vimtx:/archive        # Mount a local folder as the backup archive
-    depends_on:
-      - backup-rotate
-
-  backup-kanboard:
-    build:
-      context: ./volume_backup
-      dockerfile: Dockerfile
-    image: piregistry.com:5000/workflow-backup
-    container_name: workflow-backup-kanboard
-    restart: always
-    environment:
-      BACKUP_CRON_EXPRESSION: "30 */4 * * *"
-      TZ: "Asia/Shanghai"
-    volumes:
-      - kanboard_data:/backup/kanboard:ro    # Mount the Grafana data volume (as read-only)
-      - $HOME/backup/kanboard:/archive        # Mount a local folder as the backup archive
-    depends_on:
-      - backup-rotate
-
-
+# backup-vimenv:
+#   # docker run --rm -v vim-env:/dbdata -v $HOME/backup/vimtx:/backup ubuntu bash -c 'cd /dbdata &&  tar xzvf `ls /backup/backup*.tar.gz  -t | head -1` --strip 2'
+#   build:
+#     context: ./volume_backup
+#     dockerfile: Dockerfile
+#   image: docker.storage.datalab/workflow-backup
+#   container_name: workflow-backup-vimenv
+#   restart: always
+#   environment:
+#     BACKUP_CRON_EXPRESSION: "10 5 * * *"
+#     TZ: "Asia/Shanghai"
+#   volumes:
+#     - vimtx:/backup/vimtx:ro    # Mount the Grafana data volume (as read-only)
+#     - $HOME/backup/vimtx:/archive        # Mount a local folder as the backup archive
+#   depends_on:
+#     - backup-rotate
