@@ -6,7 +6,7 @@ curl http://git.storage.datalab/POFK/ansible-init/raw/main/files/add_caches.sh |
 
 curl http://git.storage.datalab/POFK/ansible-init/raw/main/files/add_caches.sh | sh -s conda
 
-yes | conda install ruamel ruamel.yaml
+yes | conda install ruamel ruamel.yaml pip
 
 yes | pip install -r $HOME/git/dotfiles/dotdrop/requirements.txt
 
